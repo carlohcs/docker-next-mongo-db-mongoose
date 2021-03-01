@@ -1,10 +1,10 @@
 db.createUser({
-  user: 'uolindieslocal',
-  pwd: 'uolindies2020',
+  user: 'nextmongolocal',
+  pwd: 'nextmongo2021',
   roles: [
     {
       role: 'readWrite',
-      db: 'uolindies'
+      db: 'nextmongo'
     }
   ]
 });

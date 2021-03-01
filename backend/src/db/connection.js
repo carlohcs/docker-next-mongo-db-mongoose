@@ -6,11 +6,11 @@ const host = env === 'dev' ? 'localhost' : 'next-mongo';
 function connect() {
   return new Promise((resolve, reject) => {
     mongoose
-      .connect(`mongodb://${host}:27017/uolindies`, {
+      .connect(`mongodb://${host}:27017/nextmongo`, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        user: 'uolindieslocal',
-        pass: 'uolindies2020'
+        user: 'nextmongolocal',
+        pass: 'nextmongo2021'
       })
       .then(() => {
         const connection = mongoose.connection;
