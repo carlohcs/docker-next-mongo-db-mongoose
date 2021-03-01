@@ -1,0 +1,87 @@
+version: "3.7"
+
+services:
+  mongo-express:
+    image: mongo-express
+    container_name: next-mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: nextmongo
+      ME_CONFIG_BASICAUTH_PASSWORD: nextmongo2021
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: nextmongo2021
+    links:
+      - mongo
+    networks:
+      - nextmongo
+
+  mongo:
+    image: mongo
+    container_name: next-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: nextmongo2021
+      MONGO_INITDB_DATABASE: nextmongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./etc/docker/mongo/data:/data/db
+      - ./etc/docker/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - nextmongo
+
+  frontend:
+    build:
+      context: ./
+      dockerfile: ./etc/docker/frontend/Dockerfile
+    container_name: uol-indies-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    command: "npm run start"
+    links:
+      - mongo
+    networks:
+      - nextmongo
+
+  backend:
+    build:
+      context: ./
+      dockerfile: ./etc/docker/backend/Dockerfile
+    container_name: uol-indies-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    command: "npm run start"
+    links:
+      - mongo
+      - mongo-express
+    networks:
+      - nextmongo
+
+  nginx:
+    image: nginx:alpine
+    container_name: uol-indies-nginx
+    restart: unless-stopped
+    ports:
+      # Frontend port
+      - 80:80
+      # Backend port
+      - 8000:81
+    command: nginx -g "daemon off;"
+    links:
+      - frontend
+      - backend
+    volumes:
+      - ./:/var/www/html
+      - ./etc/docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - nextmongo
+
+networks:
+  nextmongo:
+    driver: bridge
